@@ -10,7 +10,7 @@ load_dotenv()
 
 # Configure Streamlit page settings
 st.set_page_config(
-    page_title="Chat with Gemini-Pro!",
+    page_title="Chat with WD Bing!",
     page_icon=":brain:",  # Favicon emoji
     layout="centered",  # Page layout option
 )
