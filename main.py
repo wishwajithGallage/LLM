@@ -36,7 +36,7 @@ if "chat_session" not in st.session_state:
 
 
 # Display the chatbot's title on the page
-st.title("🦾 WD Bing")
+st.title(🦾 "WD Bing" )
 st.title("This is WD Chatbot. It is based on Gemini API.Gemini is a powerful new family of large language models (LLMs) developed by Google DeepMind.")
 st.title("You can Click below text Field and you can Type what you want to know anything!")
 
