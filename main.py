@@ -37,7 +37,7 @@ if "chat_session" not in st.session_state:
 
 # Display the chatbot's title on the page
 st.title("🤖 WD Bing - ChatBot")
-st.title("🤖 WD Bing - ChatBot")
+st.title<h2>("🤖 WD Bing - ChatBot")</h2>
 st.title("🤖 WD Bing - ChatBot")
 st.title("🤖 WD Bing - ChatBot")
 st.title("🤖 WD Bing - ChatBot")
