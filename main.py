@@ -37,7 +37,7 @@ if "chat_session" not in st.session_state:
 
 # Display the chatbot's title on the page
 st.title("🤖 WD Bing - ChatBot")
-st.title<h2>("🤖 WD Bing - ChatBot")</h2>
+st.title("ChatGPT is a conversational AI model developed by OpenAI. It is based on the GPT (Generative Pre-trained Transformer) architecture and is capable of generating human-like text responses across various topics. ChatGPT can be integrated into chatbots, virtual assistants, and other applications to engage in natural language conversations with users.")
 st.title("🤖 WD Bing - ChatBot")
 st.title("🤖 WD Bing - ChatBot")
 st.title("🤖 WD Bing - ChatBot")
