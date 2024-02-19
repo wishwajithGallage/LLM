@@ -36,8 +36,8 @@ if "chat_session" not in st.session_state:
 
 
 # Display the chatbot's title on the page
-st.title("🤖 WD Bing - ChatBot")
-st.title("ChatGPT is a conversational AI model developed by OpenAI. It is based on the GPT (Generative Pre-trained Transformer) architecture and is capable of generating human-like text responses across various topics. ChatGPT can be integrated into chatbots, virtual assistants, and other applications to engage in natural language conversations with users.")
+st.title("🤖 WD Bing")
+st.title("This is WD Chatbot. It is based on Gemini API.Gemini is a powerful new family of large language models (LLMs) developed by Google DeepMind.")
 
 
 # Display the chat history
