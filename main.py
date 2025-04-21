@@ -1,8 +1,10 @@
 import os
+import time
 import streamlit as st
 from dotenv import load_dotenv
 import google.generativeai as gen_ai
 import traceback
+from google.api_core.exceptions import ResourceExhausted
 
 # Load environment variables
 load_dotenv()
@@ -19,6 +21,11 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 # Debug mode for development (set to False in production)
 DEBUG_MODE = True
+
+# Maximum number of retries for rate limit errors
+MAX_RETRIES = 3
+# Base delay for exponential backoff (in seconds)
+BASE_DELAY = 2
 
 # Set up Google Gemini-Pro AI model
 if GOOGLE_API_KEY:
@@ -39,6 +46,26 @@ def translate_role_for_streamlit(user_role):
         return "assistant"
     else:
         return user_role
+
+# Function to send message with retry logic
+def send_message_with_retry(chat_session, prompt):
+    retries = 0
+    while retries < MAX_RETRIES:
+        try:
+            return chat_session.send_message(prompt)
+        except ResourceExhausted as e:
+            retries += 1
+            if retries < MAX_RETRIES:
+                # Exponential backoff
+                delay = BASE_DELAY ** retries
+                if DEBUG_MODE:
+                    st.info(f"Rate limit exceeded. Retrying in {delay} seconds... (Attempt {retries}/{MAX_RETRIES})")
+                time.sleep(delay)
+            else:
+                raise e
+        except Exception as e:
+            # For other exceptions, don't retry
+            raise e
 
 # Initialize chat session if API is configured
 if st.session_state.get("api_configured", False) and "chat_session" not in st.session_state:
@@ -66,22 +93,33 @@ if st.session_state.get("api_configured", False) and "chat_session" in st.sessio
 
     # Input field for user's message
     user_prompt = st.chat_input("Ask Something...")
-
+    
     if user_prompt:
         # Display user message
         st.chat_message("user").markdown(user_prompt)
         
-        # Try to get response
-        try:
-            # Send message to Gemini
-            gemini_response = st.session_state.chat_session.send_message(user_prompt)
-            
-            # Display response
-            with st.chat_message("assistant"):
+        # Create a placeholder for the response
+        response_placeholder = st.empty()
+        
+        with st.chat_message("assistant"):
+            try:
+                # Show a "thinking" message
+                with response_placeholder:
+                    st.write("Thinking...")
+                
+                # Send message to Gemini with retry logic
+                gemini_response = send_message_with_retry(st.session_state.chat_session, user_prompt)
+                
+                # Replace the placeholder with the actual response
+                response_placeholder.empty()
                 st.markdown(gemini_response.text)
                 
-        except Exception as e:
-            with st.chat_message("assistant"):
+            except ResourceExhausted:
+                st.error("Rate limit exceeded. Please try again in a minute or consider upgrading your API quota.")
+                if DEBUG_MODE:
+                    st.code(traceback.format_exc(), language="python")
+                
+            except Exception as e:
                 if DEBUG_MODE:
                     st.error(f"Error: {str(e)}")
                     st.code(traceback.format_exc(), language="python")
