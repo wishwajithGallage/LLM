@@ -27,11 +27,12 @@ MAX_RETRIES = 3
 # Base delay for exponential backoff (in seconds)
 BASE_DELAY = 2
 
-# Set up Google Gemini-Pro AI model
+# Set up Google Gemini AI model
 if GOOGLE_API_KEY:
     try:
         gen_ai.configure(api_key=GOOGLE_API_KEY)
-        model = gen_ai.GenerativeModel('gemini-pro')
+        # Updated model name - use gemini-1.5-flash or gemini-1.5-pro
+        model = gen_ai.GenerativeModel('gemini-1.5-flash')
         st.session_state.api_configured = True
     except Exception as e:
         st.error(f"Failed to configure API: {str(e) if DEBUG_MODE else 'Check your API key'}")
@@ -67,12 +68,27 @@ def send_message_with_retry(chat_session, prompt):
             # For other exceptions, don't retry
             raise e
 
+# Function to list available models (for debugging)
+def list_available_models():
+    try:
+        models = gen_ai.list_models()
+        return [model.name for model in models if 'generateContent' in model.supported_generation_methods]
+    except Exception as e:
+        return []
+
 # Initialize chat session if API is configured
 if st.session_state.get("api_configured", False) and "chat_session" not in st.session_state:
     try:
         st.session_state.chat_session = model.start_chat(history=[])
     except Exception as e:
         st.error(f"Failed to start chat: {str(e) if DEBUG_MODE else 'Unable to initialize chat'}")
+        
+        # Show available models for debugging
+        if DEBUG_MODE:
+            st.write("Available models:")
+            available_models = list_available_models()
+            for model_name in available_models:
+                st.write(f"- {model_name}")
 
 # Display the chatbot's title
 st.title("🦾 WD Bing Gallage")
@@ -127,3 +143,18 @@ if st.session_state.get("api_configured", False) and "chat_session" in st.sessio
                     st.error("I encountered an error. Please try again with a different question.")
 else:
     st.write("Please fix the API configuration issues to continue.")
+    
+    # Show debug information if API is not configured
+    if DEBUG_MODE and GOOGLE_API_KEY:
+        st.write("Debug: Attempting to list available models...")
+        try:
+            gen_ai.configure(api_key=GOOGLE_API_KEY)
+            available_models = list_available_models()
+            if available_models:
+                st.write("Available models:")
+                for model_name in available_models:
+                    st.write(f"- {model_name}")
+            else:
+                st.write("No models found or unable to list models.")
+        except Exception as e:
+            st.error(f"Error listing models: {str(e)}")
